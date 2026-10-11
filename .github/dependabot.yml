@@ -5,7 +5,11 @@ updates:
     directory: /
     schedule:
       interval: weekly
+  # all action bumps in one pull request (one build instead of one per action)
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: monthly
+    groups:
+      actions:
+        patterns: ["*"]
