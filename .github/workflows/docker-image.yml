@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - "v*"
+  pull_request:        # build only, no push
+  workflow_dispatch:   # manual build of a branch, no push
 
 permissions:
   contents: read
@@ -17,6 +19,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Tag must match the Caddy version in the Dockerfile
+        if: github.ref_type == 'tag'
+        run: |
+          caddy=$(sed -n 's/^FROM caddy:\([0-9.]*\)-alpine$/\1/p' Dockerfile)
+          builder=$(sed -n 's/^FROM .*caddy:\([0-9.]*\)-builder-alpine .*$/\1/p' Dockerfile)
+          echo "tag=$GITHUB_REF_NAME caddy=$caddy builder=$builder"
+          [ -n "$caddy" ] && [ "$caddy" = "$builder" ]
+          case "$GITHUB_REF_NAME" in "v$caddy-"[0-9]*) ;; *) echo "expected tag v$caddy-<n>" >&2; exit 1 ;; esac
+
+      # only for the final stage (setcap + module check run in the target architecture)
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
@@ -24,6 +36,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Login to GHCR
+        if: github.ref_type == 'tag'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -35,17 +48,21 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ghcr.io/${{ github.repository }}
+          # v2.11.7-1 -> 2.11.7-1 (immutable, use this one in compose), 2.11.7 and latest (moving)
           tags: |
-            type=semver,pattern={{version}}
-            type=raw,value=latest,enable=true
+            type=match,pattern=v(.*),group=1
+            type=match,pattern=v(\d+\.\d+\.\d+),group=1
+            type=raw,value=latest,enable=${{ github.ref_type == 'tag' }}
 
       - name: Build and push (multi-arch)
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
-          push: true
+          push: ${{ github.ref_type == 'tag' }}
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          build-args: |
-            CADDY_VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: mode=max
+          sbom: true
