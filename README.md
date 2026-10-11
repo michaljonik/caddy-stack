@@ -105,31 +105,23 @@ limiter act on the wrong client.
 
 The build number goes up when only the plugins change.
 
-## Building
+## How it's built
+
+- **Pinned inputs.** The Caddy version and every plugin version are fixed in the
+  [Dockerfile](Dockerfile); Dependabot proposes new Caddy releases.
+- **No emulated compilation.** The Go build runs on the runner's own architecture and
+  cross-compiles for `amd64` and `arm64`; QEMU is only used for the final image layer.
+- **Checked before publishing.** Pull requests build both architectures without pushing, and
+  the build fails if a plugin is missing from the binary.
+- **Releases are tags.** `v2.11.7-1` publishes the image with an SBOM and provenance
+  attestation ([workflow](.github/workflows/docker-image.yml)). A tag that doesn't match the
+  Caddy version in the Dockerfile is rejected.
+
+To check what a given image contains:
 
 ```sh
-docker build -t caddy-stack .
-docker run --rm caddy-stack caddy list-modules --versions
+docker run --rm ghcr.io/michaljonik/caddy-stack:2.11.7-1 caddy list-modules --versions
 ```
-
-The Go build runs on the build machine's own architecture and cross-compiles for the target,
-so a multi-arch build doesn't compile under emulation.
-
-To change the Caddy version, edit both `FROM` lines in the [Dockerfile](Dockerfile); to add,
-remove or bump a plugin, edit the `--with` lines.
-
-## Releasing
-
-Pushing a tag `v<caddy version>-<build>` builds both architectures and publishes the image to
-GHCR with an SBOM and provenance attestation ([workflow](.github/workflows/docker-image.yml)).
-The workflow refuses a tag that doesn't match the Caddy version in the Dockerfile.
-
-```sh
-git tag v2.11.7-1 && git push origin v2.11.7-1
-```
-
-Pull requests build both architectures without publishing. Dependabot proposes new Caddy
-versions and action updates.
 
 ## License
 
