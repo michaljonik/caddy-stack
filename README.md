@@ -8,21 +8,23 @@ limiting. Built with [xcaddy](https://github.com/caddyserver/xcaddy) on top of t
 `caddy` image, for `linux/amd64` and `linux/arm64`.
 
 ```sh
-docker pull ghcr.io/michaljonik/caddy-stack:2.10.2
+docker pull ghcr.io/michaljonik/caddy-stack:2.11.7-1
 ```
 
 ## What's inside
 
-| Plugin | Adds | Used for |
-|---|---|---|
-| [caddy-dns/cloudflare](https://github.com/caddy-dns/cloudflare) | `dns cloudflare` | ACME DNS-01 challenge, so wildcard certificates work without opening port 80 |
-| [hslatman/caddy-crowdsec-bouncer](https://github.com/hslatman/caddy-crowdsec-bouncer) | `crowdsec`, `appsec` | dropping requests from IPs banned by [CrowdSec](https://www.crowdsec.net); optional WAF through the AppSec component |
-| [mholt/caddy-ratelimit](https://github.com/mholt/caddy-ratelimit) | `rate_limit` | per-client request limits |
-| [sablierapp/sablier-caddy-plugin](https://github.com/sablierapp/sablier-caddy-plugin) | `sablier` | starting containers on demand |
-| [caddyserver/transform-encoder](https://github.com/caddyserver/transform-encoder) | `transform` log encoder | access logs in a custom text format |
+| Plugin | Version | Adds | Used for |
+|---|---|---|---|
+| [caddy-dns/cloudflare](https://github.com/caddy-dns/cloudflare) | v0.2.4 | `dns cloudflare` | ACME DNS-01 challenge, so wildcard certificates work without opening port 80 |
+| [hslatman/caddy-crowdsec-bouncer](https://github.com/hslatman/caddy-crowdsec-bouncer) | v0.14.1 | `crowdsec`, `appsec` | dropping requests from IPs banned by [CrowdSec](https://www.crowdsec.net); optional WAF through the AppSec component |
+| [mholt/caddy-ratelimit](https://github.com/mholt/caddy-ratelimit) | v0.1.0 | `rate_limit` | per-client request limits |
+
+Plugin versions are pinned in the [Dockerfile](Dockerfile), so rebuilding a tag gives the same
+modules. The build fails if one of them is missing from the binary.
 
 Everything else is the stock image: same entrypoint, same `/data` and `/config` volumes, same
-default Caddyfile location. It is a drop-in replacement for `caddy:<version>-alpine`.
+default Caddyfile location. It is a drop-in replacement for `caddy:<version>-alpine`, including
+the `cap_net_bind_service` file capability, so it can bind 80/443 when run as a non-root user.
 
 ## Usage
 
@@ -31,7 +33,7 @@ default Caddyfile location. It is a drop-in replacement for `caddy:<version>-alp
 ```yaml
 services:
   caddy:
-    image: ghcr.io/michaljonik/caddy-stack:2.10.2
+    image: ghcr.io/michaljonik/caddy-stack:2.11.7-1
     restart: unless-stopped
     environment:
       CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN}   # Zone:Read + DNS:Edit on the zone
@@ -97,28 +99,28 @@ limiter act on the wrong client.
 
 | Tag | Meaning |
 |---|---|
-| `2.10.2` | built from Caddy 2.10.2 |
+| `2.11.7-1` | Caddy 2.11.7, build 1. Never moves: use this one in compose files |
+| `2.11.7` | the latest build of Caddy 2.11.7 |
 | `latest` | the most recent build |
 
-The image tag is the Caddy version it was built from.
+The build number goes up when only the plugins change.
 
-## Building
+## How it's built
+
+- **Pinned inputs.** The Caddy version and every plugin version are fixed in the
+  [Dockerfile](Dockerfile); Dependabot proposes new Caddy releases.
+- **No emulated compilation.** The Go build runs on the runner's own architecture and
+  cross-compiles for `amd64` and `arm64`; QEMU is only used for the final image layer.
+- **Checked before publishing.** Pull requests build both architectures without pushing, and
+  the build fails if a plugin is missing from the binary.
+- **Releases are tags.** `v2.11.7-1` publishes the image with an SBOM and provenance
+  attestation ([workflow](.github/workflows/docker-image.yml)). A tag that doesn't match the
+  Caddy version in the Dockerfile is rejected.
+
+To check what a given image contains:
 
 ```sh
-docker build -t caddy-stack .
-docker build --build-arg CADDY_VERSION=2.10.2 -t caddy-stack:2.10.2 .
-docker run --rm caddy-stack caddy list-modules --versions
-```
-
-To add or remove a plugin, edit the `--with` lines in the [Dockerfile](Dockerfile).
-
-## Releasing
-
-Pushing a tag `v<caddy version>` builds both architectures and publishes the image to GHCR
-([workflow](.github/workflows/docker-image.yml)):
-
-```sh
-git tag v2.10.2 && git push origin v2.10.2
+docker run --rm ghcr.io/michaljonik/caddy-stack:2.11.7-1 caddy list-modules --versions
 ```
 
 ## License
