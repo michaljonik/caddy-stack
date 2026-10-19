@@ -108,7 +108,8 @@ The build number goes up when only the plugins change.
 ## How it's built
 
 - **Pinned inputs.** The Caddy version and every plugin version are fixed in the
-  [Dockerfile](Dockerfile); Dependabot proposes new Caddy releases.
+  [Dockerfile](Dockerfile); Renovate proposes new Caddy and plugin releases (and keeps the
+  table above in step).
 - **No emulated compilation.** The Go build runs on the runner's own architecture and
   cross-compiles for `amd64` and `arm64`; QEMU is only used for the final image layer.
 - **Checked before publishing.** Pull requests build both architectures without pushing, and
