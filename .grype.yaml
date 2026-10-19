@@ -1,0 +1,7 @@
+# Only vulnerabilities that already have a fixed version.
+only-fixed: true
+
+ignore:
+  # Bug in the CrowdSec AppSec engine, not in the bouncer library built in here; the engine
+  # runs separately (crowdsec v1.8.1 >= 1.7.8). Accepted 19.10.2026.
+  - vulnerability: GHSA-rw47-hm26-6wr7

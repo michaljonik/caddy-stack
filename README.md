@@ -1,6 +1,7 @@
 # caddy-stack
 
 [![Build & Push Docker Image](https://github.com/michaljonik/caddy-stack/actions/workflows/docker-image.yml/badge.svg)](https://github.com/michaljonik/caddy-stack/actions/workflows/docker-image.yml)
+[![CVE scan](https://github.com/michaljonik/caddy-stack/actions/workflows/cve-scan.yml/badge.svg)](https://github.com/michaljonik/caddy-stack/actions/workflows/cve-scan.yml)
 [![Release](https://img.shields.io/github/v/release/michaljonik/caddy-stack)](https://github.com/michaljonik/caddy-stack/releases/latest)
 [![Renovate](https://img.shields.io/badge/renovate-enabled-brightgreen?logo=renovate)](https://github.com/michaljonik/caddy-stack/issues?q=is%3Aissue+Renovate)
 [![License](https://img.shields.io/github/license/michaljonik/caddy-stack)](LICENSE)
