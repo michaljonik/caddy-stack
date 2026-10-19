@@ -8,7 +8,7 @@ on:
   workflow_dispatch:   # manual build of a branch, no push
 
 permissions:
-  contents: read
+  contents: write   # GitHub release for tags
   packages: write
 
 jobs:
@@ -66,3 +66,9 @@ jobs:
           cache-to: type=gha,mode=max
           provenance: mode=max
           sbom: true
+
+      - name: GitHub release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" --verify-tag --generate-notes --latest --title "$GITHUB_REF_NAME"

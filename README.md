@@ -1,6 +1,10 @@
 # caddy-stack
 
 [![Build & Push Docker Image](https://github.com/michaljonik/caddy-stack/actions/workflows/docker-image.yml/badge.svg)](https://github.com/michaljonik/caddy-stack/actions/workflows/docker-image.yml)
+[![Release](https://img.shields.io/github/v/release/michaljonik/caddy-stack)](https://github.com/michaljonik/caddy-stack/releases/latest)
+[![Renovate](https://img.shields.io/badge/renovate-enabled-brightgreen?logo=renovate)](https://github.com/michaljonik/caddy-stack/issues?q=is%3Aissue+Renovate)
+[![License](https://img.shields.io/github/license/michaljonik/caddy-stack)](LICENSE)
+[![Image](https://img.shields.io/badge/ghcr.io-michaljonik%2Fcaddy--stack-blue?logo=docker)](https://github.com/michaljonik/caddy-stack/pkgs/container/caddy-stack)
 
 A [Caddy](https://caddyserver.com) image with the plugins I need on a self-hosted reverse
 proxy: wildcard certificates through the Cloudflare DNS challenge, CrowdSec blocking and rate
