@@ -12,9 +12,12 @@
   "customManagers": [
     {
       "customType": "regex",
-      "description": "Plugins built in by xcaddy",
+      "description": "Plugins built in by xcaddy, and transitive modules forced with --replace",
       "managerFilePatterns": ["/(^|/)Dockerfile$/"],
-      "matchStrings": ["--with (?<depName>[^@\\s]+)@(?<currentValue>v[0-9][^\\s\\\\]*)"],
+      "matchStrings": [
+        "--with (?<depName>[^@\\s]+)@(?<currentValue>v[0-9][^\\s\\\\]*)",
+        "--replace (?<depName>[^=\\s]+)=[^@\\s]+@(?<currentValue>v[0-9][^\\s\\\\]*)"
+      ],
       "datasourceTemplate": "go"
     },
     {
