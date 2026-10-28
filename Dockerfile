@@ -19,7 +19,7 @@ RUN --mount=type=cache,target=/go/pkg/mod \
         --with github.com/caddy-dns/cloudflare@v0.2.4 \
         --with github.com/hslatman/caddy-crowdsec-bouncer@v0.14.1 \
         --with github.com/mholt/caddy-ratelimit@v0.1.0 \
-        --replace golang.org/x/net=golang.org/x/net@v0.60.0
+        --replace golang.org/x/net=golang.org/x/net@v0.62.0
 
 FROM caddy:2.11.7-alpine
 # Alpine security fixes released after the official image was built (e.g. zlib). Caddy and the
